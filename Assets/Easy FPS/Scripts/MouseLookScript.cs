@@ -40,7 +40,7 @@ public class MouseLookScript : MonoBehaviour {
 	[HideInInspector] public float wantedZ;
 	[HideInInspector] public float timeSpeed = 2;
 
-	[HideInInspector] public float timerToRotateZ;
+    [HideInInspector] public float timerToRotateZ;
 	/*
 	* Switching Z rotation and applying to camera in camera Rotation().
 	*/
