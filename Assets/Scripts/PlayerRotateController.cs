@@ -51,7 +51,7 @@ public class PlayerRotateController : MonoBehaviour
     private float zRotation;
     private float wantedZ;
     private float timeSpeed = 2f;
-    private float timerToRotateZ = 1f;
+    private float timerToRotateZ = 10f;
 
     float deltaTime = 0.0f;
 
@@ -66,7 +66,7 @@ public class PlayerRotateController : MonoBehaviour
         /*
 	    * Reduxing mouse sensitvity if we are aiming.
 	    */
-        mouseSensitvity = (Input.GetAxis("Fire2") != 0) ? mouseSensitvity_aiming : mouseSensitvity_notAiming;
+        mouseSensitvity = 4; //(Input.GetAxis("Fire2") != 0) ? mouseSensitvity_aiming : mouseSensitvity_notAiming;
 
         ApplyingStuff();
     }
@@ -75,7 +75,7 @@ public class PlayerRotateController : MonoBehaviour
     {
         MouseInputMovement();
 
-        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+        // deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
 
         HeadMovement();
     }
