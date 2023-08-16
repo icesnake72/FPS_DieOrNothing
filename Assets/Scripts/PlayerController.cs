@@ -6,24 +6,33 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField]
-    private float max_speed = 3f;
+    private float walk_speed = 2f;
 
     [SerializeField]
-    private TextMeshProUGUI debugText;
+    private float run_speed = 4f;
 
     [SerializeField]
-    private float Jumpforce = 260f;
+    private float max_speed = 2f;
+
+    // [SerializeField]
+    // private TextMeshProUGUI debugText;
 
     [SerializeField]
-    private float gravity_weight = 20f;
+    private float Jumpforce = 250f;
+
+    [SerializeField]
+    private float gravity_weight = 1.1f;
     
     [SerializeField]
     private LayerMask GroundLayer;
 
+    [SerializeField]
+    float smoothTime = 1F;
 
-    private float currentSpeed;
+
+    // private float currentSpeed;
     private Rigidbody rigid;
-
+    private ShowDebugInfo logInfo;
     private List<string> infos;
 
     
@@ -31,14 +40,15 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         infos = new List<string>();
-        rigid = GetComponent<Rigidbody>();        
+        rigid = GetComponent<Rigidbody>();
+        logInfo = GetComponent<ShowDebugInfo>();
     }
 
     private void FixedUpdate()
     {
         infos.Clear();
         Move();        
-        ShowInfo();
+        //ShowInfo();
     }
 
     // Update is called once per frame
@@ -49,71 +59,76 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        currentSpeed = rigid.velocity.magnitude;
+        // currentSpeed = rigid.velocity.magnitude;
 
         Vector2 horizontalMovement = new Vector2(rigid.velocity.x, rigid.velocity.z);
         if (horizontalMovement.magnitude > max_speed)
         {
             horizontalMovement = horizontalMovement.normalized;
-            horizontalMovement *= max_speed;
+            horizontalMovement *= max_speed;            
         }
 
         float gravity = rigid.velocity.y;
         if (rigid.velocity.y < 0)
-            gravity *= gravity_weight;
+            gravity *= gravity_weight;            
+        
 
         rigid.velocity = new Vector3( horizontalMovement.x,
-            // rigid.velocity.y,
+        //    // rigid.velocity.y,
             gravity,
             horizontalMovement.y );
 
         if (IsGround())
         {
-            Vector3 slowDown = Vector3.zero;
-            float smoothTime = 1F;
+            Vector3 slowDown = Vector3.zero;            
             rigid.velocity = Vector3.SmoothDamp(rigid.velocity,
-                    new Vector3(0, rigid.velocity.y, 0),
+                    new Vector3(0, gravity, 0),
                     ref slowDown,
                     smoothTime);
         }
 
         float dirX = Input.GetAxis("Horizontal");
         float dirZ = Input.GetAxis("Vertical");
+        max_speed = (Input.GetButton("Run")) ? ((dirZ > 0f) ? run_speed : walk_speed) : walk_speed;     // 후진인경우에는 달리기를 허용하지 않음
 
         Vector3 force = new Vector3(dirX, 0f, dirZ);
-        rigid.AddRelativeForce(force, ForceMode.Impulse);        
-                
+        rigid.AddRelativeForce(force, ForceMode.Impulse);
         
-
-        AddInfo($"dirX : {dirX}, dirZ : {dirZ}");                
-        AddInfo($"Rigidboyd.velocity = {rigid.velocity.ToString()}");        
-        AddInfo($"IsGround() : {IsGround()}");
+        logInfo.SetLogItem("dirX", dirX.ToString());
+        logInfo.SetLogItem("Rigidboyd.velocity.magnitude", Mathf.RoundToInt(rigid.velocity.magnitude).ToString());
+        logInfo.SetLogItem("IsGround()", IsGround().ToString());
     }
 
-    private void AddInfo(string info)
+    public float MoveSpeed
     {
-        infos.Add(info);
-    }
-
-    private void ShowInfo()
-    {
-        string info = "";
-        foreach(string line in infos)
+        get
         {
-            info += line;
-            info += "\n";
+            return rigid.velocity.magnitude;
         }
-
-        debugText.SetText(info);
     }
+
+    //private void AddInfo(string info)
+    //{
+    //    infos.Add(info);
+    //}
+
+    //private void ShowInfo()
+    //{
+    //    string info = "";
+    //    foreach(string line in infos)
+    //    {
+    //        info += line;
+    //        info += "\n";
+    //    }
+
+    //    debugText.SetText(info);
+    //}
 
     private bool IsGround()
     {
         RaycastHit hit;        
         bool ret = Physics.Raycast(transform.position, Vector3.down, out hit, 1.1f, GroundLayer);
-        Debug.DrawRay(transform.position, Vector3.down*hit.distance, Color.red);
-        AddInfo($"hit : {hit.ToString()}");
-        AddInfo($"ret : {ret}");       
+        Debug.DrawRay(transform.position, Vector3.down*hit.distance, Color.red);        
 
         return ret;
     }
@@ -121,10 +136,8 @@ public class PlayerController : MonoBehaviour
     private void Jump()
     {
         if (Input.GetButtonDown("Jump") && IsGround())
-        {
-            // Jumpforce
-            // rigid.AddForce(new Vector3(0, Jumpforce, 0));
-            rigid.AddRelativeForce(Vector3.up * Jumpforce);            
+        {            
+            rigid.AddRelativeForce(Vector3.up * Jumpforce);
         }        
      }
 }
