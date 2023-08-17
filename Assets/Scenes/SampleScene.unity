@@ -1839,7 +1839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 488e4c5ff2cd34873a83dbb1f4d824f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walk_speed: 2
+  walk_speed: 1
   run_speed: 4
   max_speed: 2
   Jumpforce: 250
@@ -2348,7 +2348,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2c6f5ab601d22834883d3c7e18f8be41, type: 2}
+  - {fileID: 2100000, guid: ee2cbd091ade78d4d9ae2b3d259bc86b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

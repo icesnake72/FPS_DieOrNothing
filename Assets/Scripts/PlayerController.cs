@@ -57,15 +57,24 @@ public class PlayerController : MonoBehaviour
         Jump();        
     }
 
+    private bool OverMaxSpeed
+    {
+        get
+        {
+            return rigid.velocity.magnitude > max_speed;
+        }
+    }
+
     private void Move()
     {
         // currentSpeed = rigid.velocity.magnitude;
 
         Vector2 horizontalMovement = new Vector2(rigid.velocity.x, rigid.velocity.z);
-        if (horizontalMovement.magnitude > max_speed)
+        // if (horizontalMovement.magnitude > max_speed)
+        if ( OverMaxSpeed )
         {
             horizontalMovement = horizontalMovement.normalized;
-            horizontalMovement *= max_speed;            
+            horizontalMovement *= max_speed;
         }
 
         float gravity = rigid.velocity.y;
@@ -97,6 +106,7 @@ public class PlayerController : MonoBehaviour
         logInfo.SetLogItem("dirX", dirX.ToString());
         logInfo.SetLogItem("Rigidboyd.velocity.magnitude", Mathf.RoundToInt(rigid.velocity.magnitude).ToString());
         logInfo.SetLogItem("IsGround()", IsGround().ToString());
+        logInfo.SetLogItem("HorizontalMovement", horizontalMovement.ToString());
     }
 
     public float MoveSpeed
