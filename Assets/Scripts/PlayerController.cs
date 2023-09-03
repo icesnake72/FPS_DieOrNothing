@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,9 +14,6 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private float max_speed = 2f;
-
-    // [SerializeField]
-    // private TextMeshProUGUI debugText;
 
     [SerializeField]
     private float Jumpforce = 250f;
@@ -29,9 +27,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float smoothTime = 1F;
 
+    [SerializeField]
+    private float crouchHeight = 0.75f;
+
+    [SerializeField]
+    private float speedReduction = 0.5f;
+
+    
+    private Vector3 originalScale;
+    private float crouchSpeed;
+    private float originalWalkSpeed;
 
     // private float currentSpeed;
     private Rigidbody rigid;
+    private CapsuleCollider colli;
     private ShowDebugInfo logInfo;
     private List<string> infos;
 
@@ -41,14 +50,17 @@ public class PlayerController : MonoBehaviour
     {
         infos = new List<string>();
         rigid = GetComponent<Rigidbody>();
+        colli = GetComponent<CapsuleCollider>();
         logInfo = GetComponent<ShowDebugInfo>();
+        crouchSpeed = walk_speed * speedReduction;
+        originalWalkSpeed = walk_speed;
+        originalScale = transform.localScale;
     }
 
     private void FixedUpdate()
     {
         infos.Clear();
-        Move();        
-        //ShowInfo();
+        Move();                
     }
 
     // Update is called once per frame
@@ -82,8 +94,7 @@ public class PlayerController : MonoBehaviour
             gravity *= gravity_weight;            
         
 
-        rigid.velocity = new Vector3( horizontalMovement.x,
-        //    // rigid.velocity.y,
+        rigid.velocity = new Vector3( horizontalMovement.x,        
             gravity,
             horizontalMovement.y );
 
@@ -98,6 +109,8 @@ public class PlayerController : MonoBehaviour
 
         float dirX = Input.GetAxis("Horizontal");
         float dirZ = Input.GetAxis("Vertical");
+
+        Crouch();
         max_speed = (Input.GetButton("Run")) ? ((dirZ > 0f) ? run_speed : walk_speed) : walk_speed;     // 후진인경우에는 달리기를 허용하지 않음
 
         Vector3 force = new Vector3(dirX, 0f, dirZ);
@@ -107,6 +120,25 @@ public class PlayerController : MonoBehaviour
         logInfo.SetLogItem("Rigidboyd.velocity.magnitude", Mathf.RoundToInt(rigid.velocity.magnitude).ToString());
         logInfo.SetLogItem("IsGround()", IsGround().ToString());
         logInfo.SetLogItem("HorizontalMovement", horizontalMovement.ToString());
+    }
+
+    private void Crouch()
+    {
+        // Stands player up to full height
+        // Brings walkSpeed back up to original speed
+        if (Input.GetKey(KeyCode.C))
+        {            
+            transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(originalScale.x, originalScale.y*crouchHeight, originalScale.z), Time.deltaTime * 15);
+            walk_speed = crouchSpeed;
+            
+            Debug.DrawRay(transform.position, Vector3.up * 2f, Color.blue);
+            
+        }        
+        else
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, originalScale, Time.deltaTime * 15);
+            walk_speed = originalWalkSpeed;
+        }
     }
 
     public float MoveSpeed
@@ -136,9 +168,20 @@ public class PlayerController : MonoBehaviour
 
     private bool IsGround()
     {
-        RaycastHit hit;        
-        bool ret = Physics.Raycast(transform.position, Vector3.down, out hit, 1.1f, GroundLayer);
-        Debug.DrawRay(transform.position, Vector3.down*hit.distance, Color.red);        
+        RaycastHit hit;
+        float dist = colli.bounds.extents.y + 0.1f;
+        bool ret = Physics.Raycast(transform.position, Vector3.down, out hit, dist, GroundLayer);
+        
+        if (ret)
+        {
+            // 레이가 바닥과 충돌한 경우
+            Debug.DrawRay(transform.position, Vector3.down * dist, Color.green);
+        }
+        else
+        {
+            // 레이가 바닥과 충돌하지 않은 경우
+            Debug.DrawRay(transform.position, Vector3.down * dist, Color.red);
+        }        
 
         return ret;
     }

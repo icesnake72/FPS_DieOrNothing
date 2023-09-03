@@ -62,9 +62,7 @@ public class PlayerRotateController : MonoBehaviour
     private int int_timer;
     private float zRotation;
     private float wantedZ;
-    private float upDown;
-    private float wantedY;
-    
+        
     private float timerToRotateZ = 1f;
     private float playerSpeed;
     private float sign;
@@ -72,24 +70,20 @@ public class PlayerRotateController : MonoBehaviour
     float deltaTime = 0.0f;
 
     private void Awake()
-    {        
-        currentWeaponIndex = 0;
+    {   
         Cursor.lockState = CursorLockMode.Locked;
         logInfo = GetComponent<ShowDebugInfo>();
+
+        currentWeaponIndex = 0;        
         sign = Mathf.Sign(zRotation);
 }
-
-    private void Start()
-    {
-        upDown = mainCamTransform.localPosition.y;
-    }
 
     private void FixedUpdate()
     {
         /*
 	    * Reduxing mouse sensitvity if we are aiming.
 	    */
-        mouseSensitvity = 4; //(Input.GetAxis("Fire2") != 0) ? mouseSensitvity_aiming : mouseSensitvity_notAiming;
+        // mouseSensitvity = 4; //(Input.GetAxis("Fire2") != 0) ? mouseSensitvity_aiming : mouseSensitvity_notAiming;
 
         ApplyingStuff();
     }
@@ -116,22 +110,27 @@ public class PlayerRotateController : MonoBehaviour
         logInfo.SetLogItem("int_timer", int_timer.ToString());
         if (int_timer % 2 == 0)
         {
-            wantedY = wantedZ = -2;            
+            wantedZ = -2;            
         }
         else
         {
-            wantedY = wantedZ = 2;
+            wantedZ = 2;
         }
 
-        zRotation = Mathf.Lerp(zRotation, wantedZ, Time.deltaTime * timerToRotateZ);
-        // upDown = mainCamTransform.localPosition.y + Mathf.Lerp(mainCamTransform.localPosition.y, wantedY, Time.deltaTime * timerToRotateZ);
+        zRotation = Mathf.Lerp(zRotation, wantedZ, Time.deltaTime * timerToRotateZ);        
     }
 
 
     private void MouseInputMovement()
     {
+        // 마우스의 수평축(X 방향) 이동은 Y축을 중심으로한 회전값을 얻는다 
         wantedYRotation += Input.GetAxis("Mouse X") * mouseSensitvity;
+
+        // 마우스의 수직축(Y 방향) 이동은 X축을 중심으로한 회전값을 얻는다
+        // 입력되는 값을 빼주어야 상하방향이 맞게 회전한다 
         wantedCameraXRotation -= Input.GetAxis("Mouse Y") * mouseSensitvity;
+
+        // 최대 최소 앵글 범위를 벗어나지 않도록 회전값을 제한한다 
         wantedCameraXRotation = Mathf.Clamp(wantedCameraXRotation, bottomAngleView, topAngleView);
     }
 
@@ -142,20 +141,19 @@ public class PlayerRotateController : MonoBehaviour
     */
     void ApplyingStuff()
     {
-
+        // 현재 Roation 값에서 원하는 Roation값만큼 부드러운 회전을 할 수 있는 값을 새로 구한다 
         currentYRotation = Mathf.SmoothDamp(currentYRotation, wantedYRotation, ref rotationYVelocity, yRotationSpeed);
         currentCameraXRotation = Mathf.SmoothDampAngle(currentCameraXRotation, wantedCameraXRotation, ref cameraXVelocity, xCameraSpeed);
 
          //WeaponRotation();
 
+        // Y축을 중심으로 플레이어의 몸체를 회전시킨다 
         transform.rotation = Quaternion.Euler(0, currentYRotation, 0);
-        mainCamTransform.localRotation = Quaternion.Euler(currentCameraXRotation, 0, zRotation);
-        PlayFootStep();
 
-        mainCamTransform.localPosition = new Vector3(mainCamTransform.localPosition.x, upDown, mainCamTransform.localPosition.z);
-        logInfo.SetLogItem("mainCamTransform.localPosition", mainCamTransform.localPosition.ToString());
-        Debug.Log(upDown);
-        Debug.Log(mainCamTransform.localPosition);
+        // 
+        mainCamTransform.localRotation = Quaternion.Euler(currentCameraXRotation, 0, zRotation);
+        Debug.DrawRay(mainCamTransform.position, mainCamTransform.forward * 2f, Color.red);
+        PlayFootStep();        
     }
 
     
