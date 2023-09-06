@@ -33,6 +33,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float speedReduction = 0.5f;
 
+    [SerializeField]
+    private AudioSource freakZombieSound;
+
     
     private Vector3 originalScale;
     private float crouchSpeed;
@@ -44,7 +47,39 @@ public class PlayerController : MonoBehaviour
     private ShowDebugInfo logInfo;
     private List<string> infos;
 
-    
+
+    private static PlayerController playerController;
+
+    // 싱글톤 인스턴스를 가져오는 프로퍼티
+    public static PlayerController Instance
+    {
+        get
+        {
+            if (playerController == null)
+            {
+                // 씬에서 싱글톤 인스턴스를 찾거나 생성
+                playerController = FindObjectOfType<PlayerController>();
+
+                if (playerController == null)
+                {
+                    // 씬에 없다면 새로 생성
+                    GameObject obj = new GameObject("PlayerController");
+                    playerController = obj.AddComponent<PlayerController>();
+                }
+            }
+
+            return playerController;
+        }
+    }
+
+    public AudioSource FreakZombieSound
+    {
+        get
+        {
+            return freakZombieSound;
+        }
+    }
+
 
     private void Awake()
     {
@@ -91,10 +126,9 @@ public class PlayerController : MonoBehaviour
 
         float gravity = rigid.velocity.y;
         if (rigid.velocity.y < 0)
-            gravity *= gravity_weight;            
+            gravity *= gravity_weight;
         
-
-        rigid.velocity = new Vector3( horizontalMovement.x,        
+        rigid.velocity = new Vector3( horizontalMovement.x,
             gravity,
             horizontalMovement.y );
 
@@ -132,7 +166,6 @@ public class PlayerController : MonoBehaviour
             walk_speed = crouchSpeed;
             
             Debug.DrawRay(transform.position, Vector3.up * 2f, Color.blue);
-            
         }        
         else
         {
@@ -146,6 +179,15 @@ public class PlayerController : MonoBehaviour
         get
         {
             return rigid.velocity.magnitude;
+        }
+    }
+
+
+    public float MaxSpeed
+    {
+        get
+        {
+            return max_speed;
         }
     }
 
@@ -171,17 +213,8 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
         float dist = colli.bounds.extents.y + 0.1f;
         bool ret = Physics.Raycast(transform.position, Vector3.down, out hit, dist, GroundLayer);
-        
-        if (ret)
-        {
-            // 레이가 바닥과 충돌한 경우
-            Debug.DrawRay(transform.position, Vector3.down * dist, Color.green);
-        }
-        else
-        {
-            // 레이가 바닥과 충돌하지 않은 경우
-            Debug.DrawRay(transform.position, Vector3.down * dist, Color.red);
-        }        
+
+        Debug.DrawRay(transform.position, Vector3.down * dist, (ret) ? Color.green : Color.red);
 
         return ret;
     }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using Unity.VisualScripting;
 
 public class PlayerRotateController : MonoBehaviour
 {
@@ -8,7 +10,14 @@ public class PlayerRotateController : MonoBehaviour
     private Transform mainCamTransform;
 
     [SerializeField]
+    private Camera secondCamera;
+
+    [SerializeField]
     private GameObject[] weapons;
+
+    [SerializeField]
+    private GameObject bulletSpawn;
+
     
     [Tooltip("카메라 앵글 머리위쪽 한계 각도")]
     [SerializeField]
@@ -42,12 +51,8 @@ public class PlayerRotateController : MonoBehaviour
     [SerializeField]
     private AudioSource RightfootStep;
 
-
-    private ShowDebugInfo logInfo;
-
-
-    private int currentWeaponIndex;
-
+    
+    
     private float wantedYRotation;
     private float currentYRotation;
     private float rotationYVelocity;
@@ -67,16 +72,102 @@ public class PlayerRotateController : MonoBehaviour
     private float playerSpeed;
     private float sign;
 
+    public static Func<Transform> PlayerTransform;
+    public static Func<Transform> CameraTransform;
+
     float deltaTime = 0.0f;
+
+    private static PlayerRotateController prcInstance;
+
+
+    private ShowDebugInfo logInfo;
+
+    // 싱글톤 인스턴스를 가져오는 프로퍼티
+    public static PlayerRotateController Instance
+    {
+        get
+        {
+            if (prcInstance == null)
+            {
+                // 씬에서 싱글톤 인스턴스를 찾거나 생성
+                prcInstance = FindObjectOfType<PlayerRotateController>();
+
+                if (prcInstance == null)
+                {
+                    // 씬에 없다면 새로 생성
+                    GameObject obj = new GameObject("PlayerRotateController");
+                    prcInstance = obj.AddComponent<PlayerRotateController>();
+                }
+            }
+
+            return prcInstance;
+        }
+    }
 
     private void Awake()
     {   
         Cursor.lockState = CursorLockMode.Locked;
         logInfo = GetComponent<ShowDebugInfo>();
 
-        currentWeaponIndex = 0;        
+         // currentWeaponIndex = 0;        
         sign = Mathf.Sign(zRotation);
-}
+
+        PlayerTransform = () => { return transform; };
+        CameraTransform = () => { return mainCamTransform; };
+    }
+
+    public Transform MainCameraTransform
+    {
+        get
+        {
+            return mainCamTransform;
+        }
+    }
+
+    public Camera SecondCamera
+    {
+        get
+        {
+            return secondCamera;
+        }
+    }
+
+    public GameObject BulletSpawn
+    {
+        get
+        {
+            return bulletSpawn;
+        }
+    }
+
+    public float CurrentYRotation
+    {
+        get
+        {
+            return currentYRotation;
+        }
+    }
+
+    public float CurrentCameraXRotation
+    {
+        get
+        {
+            return currentCameraXRotation;
+        }
+    }
+
+    public float MouseSensitivityNotAimimg
+    {
+        get { return mouseSensitvity_notAiming; }
+        set { mouseSensitvity_notAiming = value; }
+    }
+
+    public float MouseSensitivityAimimg
+    {
+        get { return mouseSensitvity_aiming; }
+        set { mouseSensitvity_aiming = value; }
+    }
+
 
     private void FixedUpdate()
     {
