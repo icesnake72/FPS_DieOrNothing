@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
+using TMPro;
 
 public class GunManager : MonoBehaviour
 {
@@ -19,15 +20,19 @@ public class GunManager : MonoBehaviour
 
     [Tooltip("Spacing between icons.")]
     [SerializeField] private int spacing = 10;
+
     [Tooltip("Begin position in percetanges of screen.")]
     [SerializeField] private Vector2 beginPosition;
+
     [Tooltip("Size of icon in percetanges of screen.")]
     [SerializeField] private Vector2 size;
-
-        
+          
     [Header("Sounds")]
     [Tooltip("Sound of weapon changing.")]
     [SerializeField] private AudioSource weaponChanging;
+
+    [SerializeField] private TextMeshProUGUI bulletsInfo;
+    
 
     private void Awake()
     {
@@ -136,6 +141,8 @@ public class GunManager : MonoBehaviour
             currentGun = (GameObject)Instantiate(resource, transform.position, /*gameObject.transform.rotation*/Quaternion.identity);            
         }
 
+        currentGun.GetComponent<GunController>().BulletsInfo = bulletsInfo;
+
         AssignHandsAnimator();
     }
 
@@ -164,75 +171,22 @@ public class GunManager : MonoBehaviour
 
     private void OnGUI()
     {
-        //if (curWeaponIndex)
-        {
-            for (int i = 0; i < weapons.Count; i++)
-            {
-                DrawCorrespondingImage(i);
-            }
-        }
+        DrawCorrespondingImage();
     }
 
-    private void DrawCorrespondingImage(int i)
+    private void DrawCorrespondingImage()
     {
         if ( icons.Count == weapons.Count )
-        {
-            GUI.DrawTexture(new Rect(PercentageToScreen(beginPosition).x,
-                                 PercentageToScreen(beginPosition).y, //position variables
-                                 PercentageToScreen(size).x,
-                                 PercentageToScreen(size).y),
-                                 icons[0]);
-
-            GUI.DrawTexture(new Rect(PercentageToScreen(beginPosition).x + (1 * Position_x(spacing) + 10),
-                                     PercentageToScreen(beginPosition).y + 10,
-                                     PercentageToScreen(size).x - 20,
-                                     PercentageToScreen(size).y - 20),
-                                     icons[1]);
-        }
-        
-
-
-        // string deleteCloneFromName = currentGun.name.Substring(0, currentGun.name.Length - 7);
-
-        //if (deleteCloneFromName == gunsIHave[_number])
-        //{
-        //    GUI.DrawTexture(new Rect( vec2(beginPosition).x + (_number * position_x(spacing)),
-        //                              vec2(beginPosition).y,//position variables
-        //                              vec2(size).x, vec2(size).y),//size
-        //                              icons[_number] );
-        //}
-        //else
-        //{
-        //    GUI.DrawTexture(new Rect(vec2(beginPosition).x + (_number * position_x(spacing) + 10), vec2(beginPosition).y + 10,//position variables
-        //    vec2(size).x - 20, vec2(size).y - 20),//size
-        //        icons[_number]);
-        //}
+        {            
+            for(int i=0; i<weapons.Count; i++)
+            {                
+                GUI.DrawTexture(new Rect(PercentageToScreen.vec2(beginPosition).x + (PercentageToScreen.position_x(spacing) * i + spacing),
+                                 PercentageToScreen.vec2(beginPosition).y, //position variables
+                                 PercentageToScreen.vec2(size).x,
+                                 PercentageToScreen.vec2(size).y),
+                                 icons[i]);
                 
-    }
-
-    //#####		RETURN THE SIZE AND POSITION for GUI images
-    //(we pass in the percentage and it returns some number to appear in that percentage on the sceen) ##################
-    private float Position_x(float var)
-    {
-        return Screen.width * var / 100;
-    }
-    private float Position_y(float var)
-    {
-        return Screen.height * var / 100;
-    }
-
-    private float PercentageToWidth(float var)
-    {
-        return Screen.width * var / 100;
-    }
-
-    private float PercentageToHeight(float var)
-    {
-        return Screen.height * var / 100;
-    }
-
-    private Vector2 PercentageToScreen(Vector2 _vec2)
-    {
-        return new Vector2(Screen.width * _vec2.x / 100, Screen.height * _vec2.y / 100);
+            }            
+        }
     }
 }

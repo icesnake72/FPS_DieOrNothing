@@ -43,8 +43,7 @@ public class PlayerController : MonoBehaviour
 
     // private float currentSpeed;
     private Rigidbody rigid;
-    private CapsuleCollider colli;
-    private ShowDebugInfo logInfo;
+    private CapsuleCollider colli;    
     private List<string> infos;
 
 
@@ -85,8 +84,7 @@ public class PlayerController : MonoBehaviour
     {
         infos = new List<string>();
         rigid = GetComponent<Rigidbody>();
-        colli = GetComponent<CapsuleCollider>();
-        logInfo = GetComponent<ShowDebugInfo>();
+        colli = GetComponent<CapsuleCollider>();        
         crouchSpeed = walk_speed * speedReduction;
         originalWalkSpeed = walk_speed;
         originalScale = transform.localScale;
@@ -145,15 +143,15 @@ public class PlayerController : MonoBehaviour
         float dirZ = Input.GetAxis("Vertical");
 
         Crouch();
-        max_speed = (Input.GetButton("Run")) ? ((dirZ > 0f) ? run_speed : walk_speed) : walk_speed;     // 후진인경우에는 달리기를 허용하지 않음
+        // max_speed = (Input.GetButton("Run")) ? ((dirZ > 0f) ? run_speed : walk_speed) : walk_speed;     // 후진인경우에는 달리기를 허용하지 않음
 
         Vector3 force = new Vector3(dirX, 0f, dirZ);
         rigid.AddRelativeForce(force, ForceMode.Impulse);
-        
-        logInfo.SetLogItem("dirX", dirX.ToString());
-        logInfo.SetLogItem("Rigidboyd.velocity.magnitude", Mathf.RoundToInt(rigid.velocity.magnitude).ToString());
-        logInfo.SetLogItem("IsGround()", IsGround().ToString());
-        logInfo.SetLogItem("HorizontalMovement", horizontalMovement.ToString());
+
+        ShowDebugInfo.Instance.SetLogItem("dirX", dirX.ToString());
+        ShowDebugInfo.Instance.SetLogItem("Rigidboyd.velocity.magnitude", Mathf.RoundToInt(rigid.velocity.magnitude).ToString());
+        ShowDebugInfo.Instance.SetLogItem("IsGround()", IsGround().ToString());
+        ShowDebugInfo.Instance.SetLogItem("HorizontalMovement", horizontalMovement.ToString());
     }
 
     private void Crouch()
@@ -185,10 +183,8 @@ public class PlayerController : MonoBehaviour
 
     public float MaxSpeed
     {
-        get
-        {
-            return max_speed;
-        }
+        get { return max_speed; }
+        set { max_speed = value; }
     }
 
     //private void AddInfo(string info)

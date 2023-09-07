@@ -79,9 +79,6 @@ public class PlayerRotateController : MonoBehaviour
 
     private static PlayerRotateController prcInstance;
 
-
-    private ShowDebugInfo logInfo;
-
     // 싱글톤 인스턴스를 가져오는 프로퍼티
     public static PlayerRotateController Instance
     {
@@ -106,8 +103,7 @@ public class PlayerRotateController : MonoBehaviour
 
     private void Awake()
     {   
-        Cursor.lockState = CursorLockMode.Locked;
-        logInfo = GetComponent<ShowDebugInfo>();
+        Cursor.lockState = CursorLockMode.Locked;        
 
          // currentWeaponIndex = 0;        
         sign = Mathf.Sign(zRotation);
@@ -168,6 +164,18 @@ public class PlayerRotateController : MonoBehaviour
         set { mouseSensitvity_aiming = value; }
     }
 
+    public float WantedCameraXRotation
+    {
+        get { return wantedCameraXRotation; }
+        set { wantedCameraXRotation = value; }
+    }
+
+    public float WantedYRotation
+    {
+        get { return wantedYRotation; }
+        set { wantedYRotation = value; }
+    }
+
 
     private void FixedUpdate()
     {
@@ -184,7 +192,7 @@ public class PlayerRotateController : MonoBehaviour
         MouseInputMovement();
 
         deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
-        logInfo.SetLogItem("deltaTime", deltaTime.ToString());
+        
 
         playerSpeed = GetComponent<PlayerController>().MoveSpeed;
         if ( playerSpeed > 1f )
@@ -196,9 +204,9 @@ public class PlayerRotateController : MonoBehaviour
         headMovementSpeed = playerSpeed;
         timer += headMovementSpeed * Time.deltaTime;
         int_timer = Mathf.RoundToInt(timer);
-        logInfo.SetLogItem("PlayerSpeed", playerSpeed.ToString());
-        logInfo.SetLogItem("timer", timer.ToString());
-        logInfo.SetLogItem("int_timer", int_timer.ToString());
+        ShowDebugInfo.Instance.SetLogItem("PlayerSpeed", playerSpeed.ToString());
+        ShowDebugInfo.Instance.SetLogItem("timer", timer.ToString());
+        ShowDebugInfo.Instance.SetLogItem("int_timer", int_timer.ToString());
         if (int_timer % 2 == 0)
         {
             wantedZ = -2;            
